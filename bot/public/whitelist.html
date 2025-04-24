@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fantastic WL</title>
+    <link rel="icon" href="media/favicon.png" type="image/png">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #ffa50022, #ff69b422);
+            color: #333;
+            margin: 0;
+            padding: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: white;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 1000px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            display: flex;
+            gap: 30px;
+        }
+
+        .form-section {
+            flex: 1;
+        }
+
+        .preview-section {
+            flex: 1;
+        }
+
+        h1 {
+            color: #ff6060;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .list {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        button {
+            background: linear-gradient(to right, #FFA500, #FF69B4);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 10px rgba(255, 165, 0, 0.5);
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="time"] {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 2px solid #ffa50066;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        input[type="time"]:focus {
+            border-color: #ff69b4;
+            outline: none;
+            box-shadow: 0 0 6px #ff69b4aa;
+        }
+
+        .embed-preview {
+            background: linear-gradient(to right, #fff0f0, #ffe6f0);
+            border-left: 4px solid #FF69B4;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 0;
+            white-space: pre-line;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .footer {
+            font-size: 0.9em;
+            color: #888;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        #logo {
+            max-height: 80px;
+            margin: 0 auto 20px auto;
+            display: block;
+        }
+
+        .wl-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: row;
+            gap: 20px;
+            padding: 0 20px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <img id="logo" src="https://i.imgur.com/b4IOdUn.jpeg" alt="Logo">
+        <h1>Nouvelle whitelist</h1>
+
+        <div class="main-content">
+            <div class="form-section">
+                <div class="section">
+                    <label>Date : <input type="date" id="dateInput" onchange="updatePreview()"></label>
+                    <label>Heure de début : <input type="time" id="timeInput" onchange="updatePreview()"></label>
+                    <label>Heure de fin : <input type="time" id="endTimeInput" onchange="updatePreview()"></label>
+                </div>
+
+                <div class="section">
+                    <h3>Projet légal disponible :</h3>
+                    <ul id="legalList" class="list"></ul>
+                    <input type="text" id="newLegal" placeholder="Ajouter un projet légal">
+                    <button onclick="addLegal()">Ajouter</button>
+                </div>
+
+                <div class="section">
+                    <h3>Projet illégal disponible :</h3>
+                    <ul id="illegalList" class="list"></ul>
+                    <input type="text" id="newIllegal" placeholder="Ajouter un projet illégal">
+                    <button onclick="addIllegal()">Ajouter</button>
+                </div>
+            </div>
+
+            <div class="preview-section">
+                <div class="embed-preview" id="embedPreview"></div>
+            </div>
+        </div>
+
+        <div class="footer" id="timestamp"></div>
+        <button onclick="sendToDiscord()">Envoyer sur Discord</button>
+        <div class="wl-buttons">
+            <button onclick="sendOpenWL()">✅ Open WL</button>
+            <button onclick="sendCloseWL()">❌ Close WL</button>
+        </div>
+    </div>
+
+    <script>
+        const legalList = document.getElementById("legalList");
+        const illegalList = document.getElementById("illegalList");
+        const preview = document.getElementById("embedPreview");
+        const timestamp = document.getElementById("timestamp");
+
+        function addLegal() {
+            const input = document.getElementById("newLegal");
+            if (input.value.trim()) {
+                const li = document.createElement("li");
+                li.textContent = `> - ${input.value}`;
+                li.addEventListener("click", (e) => {
+                    e.target.remove();
+                    updatePreview();
+                });
+
+                legalList.appendChild(li);
+                input.value = "";
+                input.focus();
+                updatePreview();
+            }
+        }
+
+        function addIllegal() {
+            const input = document.getElementById("newIllegal");
+            if (input.value.trim()) {
+                const li = document.createElement("li");
+                li.textContent = `> - ${input.value}`;
+                li.addEventListener("click", (e) => {
+                    e.target.remove();
+                    updatePreview();
+                });
+
+                illegalList.appendChild(li);
+                input.value = "";
+                input.focus();
+                updatePreview();
+            }
+        }
+
+
+        function formatHour(h, m) {
+            return parseInt(m) === 0 ? `${h}H` : `${h}H${m}`;
+        }
+
+        function formatDate(date) {
+            const d = new Date(date);
+            return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+        }
+
+        function updatePreview() {
+            const date = document.getElementById("dateInput").value;
+            const time = document.getElementById("timeInput").value;
+            const endTime = document.getElementById("endTimeInput").value;
+
+            if (!date || !time || !endTime) {
+                preview.innerHTML = "";
+                timestamp.textContent = "";
+                return;
+            }
+
+            const [h, m] = time.split(":"), [eh, em] = endTime.split(":");
+
+            const legal = Array.from(legalList.children).map(li => li.textContent).join("\n");
+            const illegal = Array.from(illegalList.children).map(li => li.textContent).join("\n");
+
+            const now = new Date().toLocaleString("fr-FR");
+
+            preview.innerHTML = `**Bonsoir à tous !**\n\n🎟️ **PROCHAINE SESSION DE WHITELIST le ${formatDate(date)} de ${formatHour(h, m)} à ${formatHour(eh, em)}**\n\n🔻 **Conditions pour passer sa WL** :\n> - Avoir 17ans et +\n> - Avoir un bon micro\n> - Être sur PC et non sur téléphone portable\n> - Avoir pris connaissance du #📄 règlement\n> - Avoir une idée de votre background\n> - Dans votre pseudo avoir [Job ou projet] devant votre nom et prénom RP\n> *Exemple: [LSPD] Nom Prénom RP - [Ballas] Nom Prénom RP*\n\n🟢 \`Projet légal disponible\` :\n ${legal}\n\n🟣 \`Projet illégal disponible :\`\n ${illegal}\n`;
+        }
+
+        async function sendToDiscord() {
+            const webhookUrl = "https://ptb.discord.com/api/webhooks/1364039326928732170/zG7bLLVsajnN2MA7Al10HEJ27auMyCDEnDsrdQJNyVuzFwr0FezLlCS5SgG2duN9kyjp";
+            const date = document.getElementById("dateInput").value;
+            const time = document.getElementById("timeInput").value;
+            const endTime = document.getElementById("endTimeInput").value;
+            const [h, m] = time.split(":"), [eh, em] = endTime.split(":");
+
+            const legal = Array.from(legalList.children).map(li => li.textContent).join("\n");
+            const illegal = Array.from(illegalList.children).map(li => li.textContent).join("\n");
+
+            const description = `**Bonsoir à tous !**\n\n> <:fantastic:1181627146653937785> **PROCHAINE SESSION DE WHITELIST le ${formatDate(date)} de ${formatHour(h, m)} à ${formatHour(eh, em)}**\n\n> <:arrow_pink:1182713864152944742> **__Conditions pour passer sa WL__** :\n> - Avoir 17ans et +\n> - Avoir un bon micro\n> - Être sur PC et non sur téléphone portable\n> - Avoir pris connaissance du <#1364038726560518156>\n> - Avoir une idée de votre background\n> - Dans votre pseudo avoir [Job ou projet] devant votre nom et prénom RP\n> *Exemple: [LSPD] Nom Prénom RP - [Ballas] Nom Prénom RP*\n\n> :green_circle: \`Projet légal disponible :\`\n ${legal}\n\n> :purple_circle: \`Projet illégal disponible :\`\n ${illegal}\n`;
+
+            const embed = {
+                color: 0xFF0000,
+                description,
+                thumbnail: {
+                    url: "https://via.placeholder.com/150x80?text=LOGO"
+                },
+                footer: {
+                    text: "Session whitelist",
+                    icon_url: "https://i.imgur.com/b4IOdUn.jpeg"
+                },
+                timestamp: new Date().toISOString()
+            };
+
+            await fetch(webhookUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content: "@everyone", embeds: [embed] })
+            });
+
+        }
+
+        document.getElementById("newLegal").addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                addLegal();
+            }
+        });
+
+        document.getElementById("newIllegal").addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                addIllegal();
+            }
+        });
+
+        window.onload = function () {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById("dateInput").value = today;
+            document.getElementById("timeInput").value = "18:00";
+            document.getElementById("endTimeInput").value = "20:00";
+            updatePreview();
+        };
+
+        async function sendOpenWL() {
+            const webhookUrl = "https://ptb.discord.com/api/webhooks/1364039326928732170/zG7bLLVsajnN2MA7Al10HEJ27auMyCDEnDsrdQJNyVuzFwr0FezLlCS5SgG2duN9kyjp";
+            const message = {
+                content: "@everyone",
+                embeds: [{
+                    color: 0xFF0000,
+                    description: "✅ **Les WL sont ON** ✅",
+                    thumbnail: {
+                        url: "https://via.placeholder.com/150x80?text=LOGO"
+                    },
+                    footer: {
+                        text: "Session whitelist",
+                        icon_url: "https://i.imgur.com/b4IOdUn.jpeg"
+                    },
+                    timestamp: new Date().toISOString()
+                }]
+            };
+
+            await fetch(webhookUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(message)
+            });
+        }
+
+        async function sendCloseWL() {
+            const webhookUrl = "https://ptb.discord.com/api/webhooks/1364039326928732170/zG7bLLVsajnN2MA7Al10HEJ27auMyCDEnDsrdQJNyVuzFwr0FezLlCS5SgG2duN9kyjp";
+            const message = {
+                content: "@everyone",
+                embeds: [{
+                    color: 0xFF0000,
+                    description: "❌ **Les WL sont OFF** ❌ Surveillez les futures <#annonces-whitelist> pour pouvoir tenter votre chance",
+                    thumbnail: {
+                        url: "https://via.placeholder.com/150x80?text=LOGO"
+                    },
+                    footer: {
+                        text: "Session whitelist",
+                        icon_url: "https://i.imgur.com/b4IOdUn.jpeg"
+                    },
+                    timestamp: new Date().toISOString()
+                }]
+            };
+
+            await fetch(webhookUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(message)
+            });
+        }
+    </script>
+</body>
+
+</html>
